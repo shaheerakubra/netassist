@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -198,6 +199,21 @@ app.post("/api/query", (req, res) => {
       }
     ]
   });
+});
+
+
+const frontendDist = path.join(__dirname, "../../frontend/dist");
+app.use(express.static(frontendDist));
+
+app.use((req, res, next) => {
+  if (
+    req.method === "GET" &&
+    !req.path.startsWith("/api/") &&
+    req.path !== "/health"
+  ) {
+    return res.sendFile(path.join(frontendDist, "index.html"));
+  }
+  next();
 });
 
 app.listen(PORT, () => {
